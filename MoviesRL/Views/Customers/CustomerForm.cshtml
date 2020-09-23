@@ -1,0 +1,48 @@
+﻿@model MoviesRL.ViewModels.CustomerFormViewModel
+
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Title</h2>
+
+@*"Create" je target action*@
+@using (Html.BeginForm("Save", "Customers")) // isto sto i self-closing <form> tag
+{
+    //@Html.ValidationSummary() // prikazuje sve error poruke za validaciju na jednom mjestu
+    // @Html.ValidationSummary(true, "Please fix the following errors.")
+    <div class="form-group">
+        @Html.LabelFor(m => m.Customer.Name)
+        @Html.TextBoxFor(m => m.Customer.Name, new { @class = "form-control" }) @*u parametru putem anonimnog objekta mozemo dodati atribute*@
+        @Html.ValidationMessageFor(m => m.Customer.Name)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Customer.MembershipTypeId)
+        @Html.DropDownListFor(m => m.Customer.MembershipTypeId, new SelectList(Model.MembershipTypes, "Id", "Name"), "Select Membership Type", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Customer.MembershipTypeId)
+    </div>
+    <div class="form-group">
+        @*<label for="Birthday">Date of Birth</label>*@
+        @Html.LabelFor(m => m.Customer.Birthdate)
+        @Html.TextBoxFor(m => m.Customer.Birthdate, "{0:d MMM yyy}", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Customer.Birthdate)
+    </div>
+    <div class="checkbox">
+        <label>
+            @Html.CheckBoxFor(m => m.Customer.IsSubscribedToNewsletter) Subscribed to NewsLetter
+        </label>
+    </div>
+    @Html.HiddenFor(m => m.Customer.Id) // Skriveno polje za ID - potrebno za svrhu update/save customera
+    @Html.AntiForgeryToken() // skriveno polje za token - na taj nacin sprjecavamo hakerske napade CSRF (Cross-site Request Forgery)
+    <button type="submit" class="btn btn-primary">Save</button>
+}
+
+@* Enableanje client-side validacije *@
+@* Sada se validacija sa forme ne izvrsava na serveru nego na klijentskoj strani *@
+@* Ovo je moguce jer ASP.NET MVC koristi data annotations i za client-side i za server-side validaciju *@
+@* Ovo vrijedi samo za standardne data annotations, dok je za custom data annotations najbolje raditi samo server-side validaciju *@
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

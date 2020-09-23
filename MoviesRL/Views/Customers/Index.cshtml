@@ -1,0 +1,43 @@
+﻿@model IEnumerable<MoviesRL.Models.Customer>
+
+@*
+    Model za ovaj view je IEnumerable<Customer>. Ovo je jednostavan interfejs koji je implementiran u klasi List. Kako u ovom view-u zelimo samo iterirati kroz listu,
+    te ne zelimo vrsiti operacije u List klasi (npr. dodavanje, uklanjanje itd.), bolje je koristiti IEnumerable interfejs koji omogucava iteriranje kroz listu.
+    Ako u buducnosti zamijenimo List sa drugo strukturom podataka, dok god je ona enumerable, nas kod u view-u ce ostati nepromijenjen.
+*@
+
+@{
+    ViewBag.Title = "Customers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Customers</h2>
+
+<p>
+    @Html.ActionLink("New Customer", "New", "Customers", null, new { @class = "btn btn-primary" })
+</p>
+
+@if(!Model.Any())
+{
+    <p>We don't have any customers yet.</p>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Membership Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var customer in Model)
+            {
+                <tr>
+                    <td>@Html.ActionLink(customer.Name, "Edit", "Customers", new { id = customer.Id }, null)</td>
+                    <td>@customer.MembershipType.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,40 @@
+﻿@using MoviesRL.Models
+@*@model MoviesRL.Models.Movie*@
+@model MoviesRL.ViewModels.RandomMovieViewModel
+
+@{
+    ViewBag.Title = "Random";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*Prvi nacin dohvatanja proslijedjenog parametra u View*@
+@*<h2>@Model.Name</h2>*@
+
+@*Drugi nacin dohvatanja proslijedjenoga parametra u View*@
+@*<h2>@(((Movie) ViewData["Movie"]).Name)</h2>*@
+
+@*Treci nacin dohvatanja proslijedjenog parametra u View*@
+@*<h2>@ViewBag.Movie ...</h2>*@
+
+@*Code block za C# kod*@
+@{ 
+    var className = Model.Customers.Count > 5 ? "popular" : null;
+}
+
+<h2 class="@className">@Model.Movie.Name</h2>
+
+@*Razor view engine u MVC-cu zna kako da parsira sve ove donje sintakse*@
+
+@if(Model.Customers.Count == 0) 
+{
+    <text>No one has rented this movie before.</text>
+}
+else 
+{
+    <ul>
+        @foreach (var customer in Model.Customers)
+        { 
+            <li>@customer.Name</li>
+        }
+    </ul>
+}

@@ -1,0 +1,16 @@
+﻿@model MoviesRL.Models.Customer
+
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Name</h2>
+
+<ul>
+    <li>Membership type: @Model.MembershipType.Name</li>
+    @if (Model.Birthday.HasValue)
+    {
+        <li>Birthday date: @Model.Birthday.Value.ToLongDateString()</li>
+    }
+</ul>
