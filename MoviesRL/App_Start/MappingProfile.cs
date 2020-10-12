@@ -14,10 +14,14 @@ namespace MoviesRL.App_Start
         public MappingProfile() // kad se pozove MappingProfile, Auto Mapper na osnovu naziva polja povezuje ta polja
         {
             Mapper.CreateMap<Customer, CustomerDto>(); // <source, target>
-            Mapper.CreateMap<CustomerDto, Customer>();
+            Mapper.CreateMap<CustomerDto, Customer>().ForMember(c => c.Id, opt => opt.Ignore());
 
             Mapper.CreateMap<Movie, MovieDto>();
-            Mapper.CreateMap<MovieDto, Movie>();
+            Mapper.CreateMap<MovieDto, Movie>().ForMember(m => m.Id, opt => opt.Ignore());
+
+            Mapper.CreateMap<MembershipType, MembershipTypeDto>();
+
+            Mapper.CreateMap<Genre, GenreDto>();
         }
         
     }

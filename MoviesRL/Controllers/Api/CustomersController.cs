@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -109,10 +110,23 @@ namespace MoviesRL.Controllers.Api
         // Auto Mapper i Dto
 
         // GET /api/customers
+        /*
         public IEnumerable<CustomerDto> GetCustomers()
         {
-            return _context.Customers.ToList().Select(Mapper.Map<Customer, CustomerDto>);
-        }
+            return _context.Customers.Include(c => c.MembershipType).ToList().Select(Mapper.Map<Customer, CustomerDto>);
+        }*/
+
+        // GET /api/customers prilagodjen za auto-completion za customer input polje iz new rental forme
+        public IHttpActionResult GetCustomers(string query = null)
+        {
+            var customersQuery = _context.Customers.Include(c => c.MembershipType);
+
+            if (!String.IsNullOrWhiteSpace(query)) customersQuery = customersQuery.Where(c => c.Name.Contains(query));
+
+            var customerDtos = customersQuery.ToList().Select(Mapper.Map<Customer, CustomerDto>);
+
+            return Ok(customerDtos);
+        } 
 
         /*
         // GET /api/customers/1

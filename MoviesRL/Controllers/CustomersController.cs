@@ -6,6 +6,8 @@ using System.Data.Entity;
 using MoviesRL.ViewModels;
 using System.Data.Entity.Validation;
 using System;
+using System.Runtime.Caching;
+
 
 namespace MoviesRL.Controllers
 {
@@ -32,13 +34,28 @@ namespace MoviesRL.Controllers
             };
         }*/
         
+        //[Authorize] // filter koji redirecta na login stranicu ukoliko nismo loginovani (mozemo ga definisati i kod kontrolera (tada se primjenjuje na sve akcije) ili globalno (za sve kontrolere i  njihove akcije u aplikaciji))
         public ViewResult Index()
         {
             //var customers = GetCustomers();
             //var customers = _context.Customers.ToList();
-            var customers = _context.Customers.Include(c => c.MembershipType).ToList();
 
-            return View(customers);
+            // Lista kupaca nam vise nije potrebna jer sada listu kupaca putem AJAX poziva na API, saljemo sa servera na klijentsku stranu
+            /*var customers = _context.Customers.Include(c => c.MembershipType).ToList();
+
+            return View(customers);*/
+
+            // Data caching - pohranjujemo rezultat queryja u kes - koristiti samo u akcijama koje prikazuju podatke, tj. koje ne modifikuju podatke
+            /*
+            if (System.Runtime.Caching.MemoryCache.Default["Genres"] == null)
+            {
+                System.Runtime.Caching.MemoryCache.Default["Genres"] = _context.Genres.ToList();
+            }
+
+            var genres = System.Runtime.Caching.MemoryCache.Default["Genres"] as IEnumerable<Genre>;
+            */
+
+            return View();
         }
 
         public ActionResult Details(int id)

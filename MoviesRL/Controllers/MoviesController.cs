@@ -35,9 +35,19 @@ namespace MoviesRL.Controllers
         public ViewResult Index()
         {
             //var movies = GetMovies();
-            var movies = _context.Movies.Include(m => m.Genre).ToList();
+            /*var movies = _context.Movies.Include(m => m.Genre).ToList();
 
             return View(movies);
+            */
+
+            //return View();
+
+            if (User.IsInRole(RoleName.CanManageMovies)) // User daje access za trenutnog usera
+            {
+                return View("List");
+            }
+
+            return View("ReadOnlyList");
         }
 
         public ActionResult Details(int id)
@@ -106,6 +116,7 @@ namespace MoviesRL.Controllers
             return Content(year + "/" + month);
         }
 
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao preko rute /movies/new pristupiti kreiranju filma 
         public ActionResult New()
         {
             var viewModel = new MovieFormViewModel
@@ -116,6 +127,7 @@ namespace MoviesRL.Controllers
             return View("MovieForm", viewModel);
         }
 
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao preko rute /movies/edit pristupiti editovanju filma 
         public ActionResult Edit(int id)
         {
             var movie = _context.Movies.SingleOrDefault(m => m.Id == id);
@@ -135,6 +147,7 @@ namespace MoviesRL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao preko rute /movies/save pristupiti submitanju forme za editovanje/dodavanje filma 
         public ActionResult Save(Movie movie)
         {
             if(!ModelState.IsValid)

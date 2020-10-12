@@ -7,7 +7,11 @@ namespace MoviesRL
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            // Ovdje registrujemo globalne filtere
+
+            filters.Add(new HandleErrorAttribute()); // defaultni filter - redirecta na error stranicu ukoliko neka akcija baci izuzetak
+            filters.Add(new AuthorizeAttribute()); // redirecta na login stranicu ukoliko nismo loginovani (ako hocemo da ipak omogucimo pristup nekoj stranici, kod kontrolera definisemo [AllowAnonymous] atribut)
+            filters.Add(new RequireHttpsAttribute()); // zabrana pristupa aplikaciji na http protokolu, omogucavanje samo za https
         }
     }
 }

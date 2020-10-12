@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -20,9 +21,21 @@ namespace MoviesRL.Controllers.Api
         }
 
         // GET /api/movies
+        /*
         public IHttpActionResult GetMovies()
         {
-            return Ok(_context.Movies.ToList().Select(Mapper.Map<Movie,  MovieDto>));
+            return Ok(_context.Movies.Include(m => m.Genre).ToList().Select(Mapper.Map<Movie,  MovieDto>));
+        }
+        */
+
+        // GET /api/movies prilagodjen za auto-completion za movie input polje iz new rental forme
+        public IEnumerable<MovieDto> GetMovies(string query = null)
+        {
+            var moviesQuery = _context.Movies.Include(m => m.Genre).Where(m => m.NumberAvailable > 0);
+
+            if (!String.IsNullOrWhiteSpace(query)) moviesQuery = moviesQuery.Where(m => m.Name.Contains(query));
+
+            return moviesQuery.ToList().Select(Mapper.Map<Movie, MovieDto>);
         }
 
         // GET /api/movies/id
@@ -40,6 +53,7 @@ namespace MoviesRL.Controllers.Api
 
         // POST /api/movies
         [HttpPost]
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao pristupiti POST metodi APIja /api/movies
         public IHttpActionResult CreateMovie(MovieDto movieDto)
         {
             if (!ModelState.IsValid)
@@ -59,6 +73,7 @@ namespace MoviesRL.Controllers.Api
 
         // PUT /api/movies/id
         [HttpPut]
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao pristupiti PUT metodi APIja /api/movies/id
         public IHttpActionResult UpdateMovie(int id, MovieDto movieDto)
         {
             if (!ModelState.IsValid)
@@ -83,6 +98,7 @@ namespace MoviesRL.Controllers.Api
 
         // DELETE /api/movies/id
         [HttpDelete]
+        [Authorize(Roles = RoleName.CanManageMovies)] // ovo ce overrideat globalni Authorize filter - zabrana da guest/neautorizovani korisnik ne bi mogao pristupiti DELETE metodi APIja /api/movies/id
         public IHttpActionResult DeleteMovie(int id)
         {
             var movieInDb = _context.Movies.SingleOrDefault(m => m.Id == id);

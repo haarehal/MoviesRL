@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MoviesRL.Models.Customer>
+﻿@*@model IEnumerable<MoviesRL.Models.Customer>*@ @* ovaj model vise ne koristimo jer sada listu kupaca putem AJAX poziva na API, saljemo sa servera na klijentsku stranu *@
 
 @*
     Model za ovaj view je IEnumerable<Customer>. Ovo je jednostavan interfejs koji je implementiran u klasi List. Kako u ovom view-u zelimo samo iterirati kroz listu,
@@ -17,27 +17,102 @@
     @Html.ActionLink("New Customer", "New", "Customers", null, new { @class = "btn btn-primary" })
 </p>
 
-@if(!Model.Any())
-{
-    <p>We don't have any customers yet.</p>
-}
-else
-{
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Customer</th>
-                <th>Membership Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var customer in Model)
+@*
+    @if(!Model.Any())
+    {
+        <p>We don't have any customers yet.</p>
+    }
+    else
+    {
+        <table>...</table>
+    }
+*@
+
+<table id="customers" class="table table-bordered table-hover">
+    @*SERVER-SIDE DEVELOPMENT - tabelu ostavljamo kao placeholder za DataTable*@
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Membership Type</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @*
+            @foreach(var customer in Model) // SERVER-SIDE DEVELOPMENT - kreiranje HTMLa na serverskoj strani i vracanje klijentu gotov HTML
             {
                 <tr>
                     <td>@Html.ActionLink(customer.Name, "Edit", "Customers", new { id = customer.Id }, null)</td>
                     <td>@customer.MembershipType.Name</td>
+                    <td>
+                        <button data-customer-id="@customer.Id" class="btn-link js-delete">Delete</button>
+                    </td>
                 </tr>
             }
-        </tbody>
-    </table>
+        *@
+    </tbody>
+</table>
+
+@* CLIENT-SIDE DEVELOPMENT *@
+@section scripts
+{
+    <script> // Javascript za client-side
+        $(document).ready(function () {
+
+            @* 
+                Preko APIja dohvatimo listu kupaca i renderujemo tabelu sa svim podacima na klijentskoj strani
+                DataTable dohvata listu kupaca preko APIja i pohranjuje ih interno da bi se mogao raditi search, sortiranje, itd.
+                Nas zaseban customer (model) ima samo par polja, ali kad bi imali ogromnu listu kupaca koji imaju po stotine polja, bolje je na serveru implementirati search, sortiranje.. a u ovoj tabeli omoguciti server-side procesiranje
+            *@
+
+            // Dio odgovoran za view
+            var table = $("#customers").DataTable({ // jQuery plugin za tabelu sa dodatnim opcijama (sortiranje, search bar, ..)
+                ajax: {
+                    url: "/api/customers", // niz objekata
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "name",
+                        render: function (data, type, customer) { // customer <-> row
+                            return "<a href='/customers/edit/" + customer.id + "'>" + customer.name + "</a>";
+                        }
+                    },
+                    {
+                        data: "membershipType.name"
+                    },
+                    {
+                        data: "id",
+                        render: function (data) {
+                            return "<button class='btn-link js-delete' data-customer-id=" + data + ">Delete</button>";
+                        }
+                    }
+                ]
+            });
+
+            // Dio odgovoran za data-access
+            //$("#customers .js-delete").on("click", function () {
+            $("#customers").on("click", ".js-delete", function () { // Optimizacija jQuery koda - kao drugi argument prosljedjujemo filter; sada bez obzira koliko customera imamo na stranici, imat cemo samo jedan click hanlder za svaki delete button (usteda memorijskih resursa)
+
+                var button = $(this); // this ne mozemo koristiti u callback funkcijama pa nam treba varijabla koja se referencira na button
+
+                bootbox.confirm("Are you sure you want to delete this customer?", function (result) {
+                    if (result) {
+                        $.ajax({
+                            url: "/api/customers/" + button.attr("data-customer-id"),
+                            method: "DELETE",
+                            success: function () {
+                                //button.parents("tr").remove(); // na ovaj nacin se izbrise citav red tabele ali taj podatak interno ostane pohranjen u tabeli (tabela interno cuva citavu listu kupaca) sve dok se ne refresha stranica
+                                table.row(button.parents("tr")).remove().draw(); // brisemo kupca iz interne liste kupaca i redrawamo tabelu
+
+                                console.log("Customer successfully deleted!");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Idealno bi bilo razdvojiti ova dva dijela (dio odgovoran za view i dio odgovoran za data-access) jer su to dvije razlicite odgovornosti
+        });
+    </script>
 }

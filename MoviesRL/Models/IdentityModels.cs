@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
@@ -9,6 +10,16 @@ namespace MoviesRL.Models
     // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser
     {
+        // Novi podaci za profil korisnika aplikacije (ukljuceni u registraciju)
+        [Required]
+        [StringLength(255)]
+        public string DrivingLicense { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Phone { get; set; }
+        /////////////////////////////////////////////////////////////////////////
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
@@ -22,8 +33,9 @@ namespace MoviesRL.Models
     {
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Movie> Movies { get; set; }
-        public DbSet<MembershipType> MembershipTypes { get; set; } // ovaj dbset nam treba za formu, inace ga ne moramo kreirat jer je to referencirana klasa
-        public DbSet<Genre> Genres { get; set; } // ovaj dbset nam treba za formu, inace ga ne moramo kreirat jer je to referencirana klasa
+        public DbSet<MembershipType> MembershipTypes { get; set; } // ovaj dbset nam treba za formu, inace ga ne moramo kreirat jer MembershipTypes referencirana klasa
+        public DbSet<Genre> Genres { get; set; } // ovaj dbset nam treba za formu, inace ga ne moramo kreirat Genres referencirana klasa
+        public DbSet<Rental> Rentals { get; set; }
 
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
